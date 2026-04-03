@@ -72,7 +72,15 @@ pip install chipfoundry-cli
 cd <project_name>
 ```
 
-### 2. Project Initialization
+### 2. Platform Login
+
+Log in to the ChipFoundry platform (required before `cf init`, `cf push`, `cf pull`, etc.):
+
+```bash
+cf login
+```
+
+### 3. Project Initialization
 
 > [!IMPORTANT]
 > Run this first! Initialize your project configuration:
@@ -83,7 +91,7 @@ cf init
 
 This creates `.cf/project.json` with project metadata. **This must be run before any other commands** (`cf setup`, `cf gpio-config`, `cf harden`, `cf precheck`, `cf verify`).
 
-### 3. Environment Setup
+### 4. Environment Setup
 Install the ChipFoundry CLI tool and set up the local environment (PDKs, OpenLane, and Caravel lite):
 
 ```bash
@@ -218,7 +226,7 @@ You can also run specific checks or disable LVS:
 
 ```bash
 cf precheck --disable-lvs                    # Skip LVS check
-cf precheck --checks license --checks makefile  # Run specific checks only
+cf precheck --checks gpio_defines --checks xor  # Run specific checks only
 ```
 ---
 
