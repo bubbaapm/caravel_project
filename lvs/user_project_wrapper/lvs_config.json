@@ -9,6 +9,9 @@
 		"*__fakediode_*",
 		"*__tapvpwrvgnd_*"
 	],
+	"EXTRACT_CREATE_SUBCUT": [
+		""
+	],
 	"LVS_FLATTEN": [
 		""
 	],
