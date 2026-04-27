@@ -116,13 +116,14 @@ phase_cf_setup() {
 
     if [ ! -d "$PDK_ROOT/sky130B" ]; then
         echo "  Running cf setup --pdk sky130B (this will take a while)..."
-        cf setup --pdk sky130B
+        # Wrap cf setup in sg docker so it has permissions to pull the Cocotb container
+        sg docker -c "PATH=\"$HOME/.local/bin:\$PATH\" cf setup --pdk sky130B"
     else
         echo "  [OK] PDK sky130B already installed"
     fi
 
     local cf_ok=true
-    for dir in "caravel" "dependencies/pdks/sky130B" "dependencies/openlane_src"; do
+    for dir in "caravel" "dependencies/pdks/sky130B"; do
         if [ ! -d "$PROJECT_ROOT/$dir" ]; then
             echo "  [WARN] $dir not found"
             cf_ok=false
@@ -193,9 +194,9 @@ phase_config_files() {
     source "$PROJECT_ROOT/setup.sh"
 
     mkdir -p "$PROJECT_ROOT/mag"
-    if [ ! -f "$PROJECT_ROOT/mag/.magicrc" ]; then
-        echo "  Copying .magicrc from PDK"
-        cp "$PDK_ROOT/sky130B/libs.tech/magic/sky130B.magicrc" "$PROJECT_ROOT/mag/.magicrc"
+    if [ ! -f "$PROJECT_ROOT/mag/sky130B.magicrc" ]; then
+        echo "  Copying sky130B.magicrc from PDK"
+        cp "$PDK_ROOT/sky130B/libs.tech/magic/sky130B.magicrc" "$PROJECT_ROOT/mag/sky130B.magicrc"
     fi
 
     mkdir -p "$PROJECT_ROOT/xschem"
@@ -230,10 +231,10 @@ phase_verify() {
     check() {
         if eval "$2" &>/dev/null; then
             echo "  [PASS] $1"
-            ((pass++))
+            pass=$((pass + 1))
         else
             echo "  [FAIL] $1"
-            ((fail++))
+            fail=$((fail + 1))
         fi
     }
 
