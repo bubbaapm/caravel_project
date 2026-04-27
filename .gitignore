@@ -15,3 +15,7 @@
 /logs
 openlane2-venv
 design_info.yaml
+
+# Local setup stuff (outside chipfoundry)
+caravel_env/
+.envrc
