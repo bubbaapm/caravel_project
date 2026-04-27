@@ -18,6 +18,9 @@ BUILD_DIR=$(mktemp -d)
 echo "Using temporary build directory: $BUILD_DIR"
 trap "rm -rf $BUILD_DIR" EXIT
 
+# Compiler flags to allow legacy C code to compile on Ubuntu 24.04+ (GCC 14)
+export CFLAGS="-std=gnu17 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=incompatible-pointer-types -Wno-error=strict-prototypes"
+
 build_magic() {
     if ! command -v magic &>/dev/null; then
         echo "Building Magic..."

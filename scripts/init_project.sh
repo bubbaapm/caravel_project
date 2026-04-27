@@ -188,14 +188,26 @@ phase_reram_osdi() {
 }
 
 phase_config_files() {
-    echo "Phase 4: Verifying config files"
+    echo "Phase 4: Configuring project RC files"
 
-    local check_files=("xschem/xschemrc" "mag/sky130B.magicrc" "mag/sky130B_setup.tcl")
-    for f in "${check_files[@]}"; do
-        if [ ! -f "$PROJECT_ROOT/$f" ]; then
-            echo "  [WARN] $f not found"
-        fi
-    done
+    source "$PROJECT_ROOT/setup.sh"
+
+    mkdir -p "$PROJECT_ROOT/mag"
+    if [ ! -f "$PROJECT_ROOT/mag/.magicrc" ]; then
+        echo "  Copying .magicrc from PDK"
+        cp "$PDK_ROOT/sky130B/libs.tech/magic/sky130B.magicrc" "$PROJECT_ROOT/mag/.magicrc"
+    fi
+
+    mkdir -p "$PROJECT_ROOT/xschem"
+    if [ ! -f "$PROJECT_ROOT/xschem/xschemrc" ]; then
+        echo "  Copying xschemrc from PDK"
+        cp "$PDK_ROOT/sky130B/libs.tech/xschem/xschemrc" "$PROJECT_ROOT/xschem/"
+    fi
+
+    if [ ! -f "$PROJECT_ROOT/mag/sky130B_setup.tcl" ]; then
+        echo "  Copying netgen setup.tcl from PDK"
+        cp "$PDK_ROOT/sky130B/libs.tech/netgen/sky130B_setup.tcl" "$PROJECT_ROOT/mag/sky130B_setup.tcl"
+    fi
 
     local exec_files=("mag/LVS" "mag/start_magic.sh")
     for f in "${exec_files[@]}"; do
@@ -229,6 +241,8 @@ phase_verify() {
     check "PDK tech file exists" "test -f $PDK_ROOT/sky130B/libs.tech/magic/sky130B.tech"
     check "ReRAM OSDI model exists" "test -f $PDK_ROOT/sky130B/libs.tech/combined/sky130_fd_pr_reram__reram_module.osdi"
     check "Caravel installed" "test -d $CARAVEL_ROOT"
+    check "Project Magic config exists" "test -f $PROJECT_ROOT/mag/.magicrc"
+    check "Project Xschem config exists" "test -f $PROJECT_ROOT/xschem/xschemrc"
 
     echo "  Results: $pass passed, $fail failed"
     echo ""
