@@ -116,7 +116,6 @@ phase_cf_setup() {
 
     if [ ! -d "$PDK_ROOT/sky130B" ]; then
         echo "  Running cf setup --pdk sky130B (this will take a while)..."
-        # Wrap cf setup in sg docker so it has permissions to pull the Cocotb container
         sg docker -c "PATH=\"$HOME/.local/bin:\$PATH\" cf setup --pdk sky130B"
     else
         echo "  [OK] PDK sky130B already installed"
@@ -194,9 +193,9 @@ phase_config_files() {
     source "$PROJECT_ROOT/setup.sh"
 
     mkdir -p "$PROJECT_ROOT/mag"
-    if [ ! -f "$PROJECT_ROOT/mag/sky130B.magicrc" ]; then
-        echo "  Copying sky130B.magicrc from PDK"
-        cp "$PDK_ROOT/sky130B/libs.tech/magic/sky130B.magicrc" "$PROJECT_ROOT/mag/sky130B.magicrc"
+    if [ ! -f "$PROJECT_ROOT/mag/.magicrc" ]; then
+        echo "  Copying .magicrc from PDK"
+        cp "$PDK_ROOT/sky130B/libs.tech/magic/sky130B.magicrc" "$PROJECT_ROOT/mag/.magicrc"
     fi
 
     mkdir -p "$PROJECT_ROOT/xschem"
@@ -218,6 +217,14 @@ phase_config_files() {
     done
 
     mkdir -p "$HOME/.xschem/simulations"
+
+    echo "  Creating .spiceinit for ngspice"
+    cat << 'EOF' > "$HOME/.spiceinit"
+set ngbehavior=hsa
+set ng_nomodcheck
+EOF
+    cp "$HOME/.spiceinit" "$HOME/.xschem/simulations/.spiceinit"
+
     echo ""
 }
 
@@ -244,6 +251,7 @@ phase_verify() {
     check "Caravel installed" "test -d $CARAVEL_ROOT"
     check "Project Magic config exists" "test -f $PROJECT_ROOT/mag/.magicrc"
     check "Project Xschem config exists" "test -f $PROJECT_ROOT/xschem/xschemrc"
+    check "Ngspice config exists" "test -f $HOME/.spiceinit"
 
     echo "  Results: $pass passed, $fail failed"
     echo ""
